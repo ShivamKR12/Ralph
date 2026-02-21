@@ -1,3 +1,7 @@
+from panda3d.core import loadPrcFileData
+loadPrcFileData("", "window-title Roaming Ralph")  
+loadPrcFileData("", "icon-filename panda3d-logo.ico")    
+
 # This tutorial provides an example of creating a character
 # and having it walk around on uneven terrain, as well
 # as implementing a fully rotatable camera.
