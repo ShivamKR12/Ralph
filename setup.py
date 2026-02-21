@@ -25,6 +25,12 @@ setup(
                 'pandagl',
                 'p3openal_audio',
             ],
+
+            "icons": {
+                # The key needs to match the key used in gui_apps/console_apps.
+                # Alternatively, use "*" to set the icon for all apps.
+                "asteroids": ["panda3d-logo.png"],
+            },
         }
     }
 )
