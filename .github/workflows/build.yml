@@ -1,0 +1,61 @@
+name: Build and Release Ralph
+
+on:
+  workflow_dispatch:   # Manual trigger only
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install setuptools
+
+      - name: Build application
+        run: |
+          python setup.py build_apps
+
+      # Archive build output per OS
+      - name: Archive Windows build
+        if: runner.os == 'Windows'
+        run: |
+          Compress-Archive -Path build\win_amd64\* -DestinationPath Ralph-Windows.zip
+
+      - name: Archive Linux build
+        if: runner.os == 'Linux'
+        run: |
+          cd build/manylinux2014_x86_64
+          zip -r ../../Ralph-Linux.zip .
+
+      - name: Archive macOS build
+        if: runner.os == 'macOS'
+        run: |
+          cd build/macosx_10_13_x86_64
+          zip -r ../../Ralph-macOS.zip .
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Ralph-Windows.zip
+            Ralph-Linux.zip
+            Ralph-macOS.zip
