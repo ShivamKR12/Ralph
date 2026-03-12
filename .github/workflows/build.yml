@@ -1,19 +1,15 @@
 name: Build and Release Ralph
 
 on:
-  workflow_dispatch:   # Manual trigger only
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   build:
-    name: Build for ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+    name: Build Game
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -34,27 +30,26 @@ jobs:
         run: |
           python setup.py build_apps
 
-      # Archive build output per OS
       - name: Archive Windows build
-        if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path build\win_amd64\* -DestinationPath Ralph-Windows.zip
+          cd build/win_amd64
+          zip -r ../../Ralph-Windows.zip .
 
       - name: Archive Linux build
-        if: runner.os == 'Linux'
         run: |
           cd build/manylinux2014_x86_64
           zip -r ../../Ralph-Linux.zip .
 
       - name: Archive macOS build
-        if: runner.os == 'macOS'
         run: |
           cd build/macosx_10_13_x86_64
           zip -r ../../Ralph-macOS.zip .
 
-      - name: Upload Release Asset
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Ralph Release v1.0.${{ github.run_number }}
           files: |
             Ralph-Windows.zip
             Ralph-Linux.zip
