@@ -1,6 +1,6 @@
 from panda3d.core import loadPrcFileData
-loadPrcFileData("", "window-title Roaming Ralph")  
-loadPrcFileData("", "icon-filename panda3d-logo.ico")    
+loadPrcFileData("", "window-title Roaming Ralph")
+loadPrcFileData("", "icon-filename panda3d-logo.ico")
 
 # This tutorial provides an example of creating a character
 # and having it walk around on uneven terrain, as well
@@ -12,7 +12,7 @@ from panda3d.core import CollisionHandlerQueue, CollisionRay
 from panda3d.core import CollisionHandlerPusher, CollisionSphere
 from panda3d.core import Filename, AmbientLight, DirectionalLight
 from panda3d.core import PandaNode, NodePath, Camera, TextNode
-from panda3d.core import CollideMask
+from panda3d.core import CollideMask, WindowProperties, PerspectiveLens
 from direct.gui.OnscreenText import OnscreenText
 from direct.actor.Actor import Actor
 import random
@@ -37,6 +37,12 @@ class RoamingRalphDemo(ShowBase):
     def __init__(self):
         # Set up the window, camera, etc.
         ShowBase.__init__(self)
+        
+        # Create a new lens
+        self.lens = PerspectiveLens()
+
+        # Listen for window size changes
+        self.accept('window-event', self.onWindowEvent)
 
         # This is used to store which keys are currently pressed.
         self.keyMap = {
@@ -71,8 +77,8 @@ class RoamingRalphDemo(ShowBase):
         # It also keeps the original mesh, so there are now two copies ---
         # one optimized for rendering, one for collisions.
 
-        self.environ = loader.loadModel("models/world")
-        self.environ.reparentTo(render)
+        self.environ = self.loader.loadModel("models/world")
+        self.environ.reparentTo(self.render)
 
         # We do not have a skybox, so we will just use a sky blue background color
         self.setBackgroundColor(0.53, 0.80, 0.92, 1)
@@ -83,7 +89,7 @@ class RoamingRalphDemo(ShowBase):
         self.ralph = Actor("models/ralph",
                            {"run": "models/ralph-run",
                             "walk": "models/ralph-walk"})
-        self.ralph.reparentTo(render)
+        self.ralph.reparentTo(self.render)
         self.ralph.setScale(.2)
         self.ralph.setPos(ralphStartPos + (0, 0, 1.5))
 
@@ -110,7 +116,7 @@ class RoamingRalphDemo(ShowBase):
         self.accept("a-up", self.setKey, ["cam-left", False])
         self.accept("s-up", self.setKey, ["cam-right", False])
 
-        taskMgr.add(self.move, "moveTask")
+        self.taskMgr.add(self.move, "moveTask")
 
         # Set up the camera
         self.disableMouse()
@@ -182,8 +188,15 @@ class RoamingRalphDemo(ShowBase):
         directionalLight.setDirection((-5, -5, -5))
         directionalLight.setColor((1, 1, 1, 1))
         directionalLight.setSpecularColor((1, 1, 1, 1))
-        render.setLight(render.attachNewNode(ambientLight))
-        render.setLight(render.attachNewNode(directionalLight))
+        self.render.setLight(self.render.attachNewNode(ambientLight))
+        self.render.setLight(self.render.attachNewNode(directionalLight))
+
+    def onWindowEvent(self, window):
+        if window.isClosed():
+            sys.exit()
+        aspect_ratio = window.getProperties().getXSize() / window.getProperties().getYSize()
+        self.lens.setAspectRatio(aspect_ratio)
+        self.cam.node().setLens(self.lens)
 
     # Records the state of the arrow keys
     def setKey(self, key, value):
@@ -262,21 +275,21 @@ class RoamingRalphDemo(ShowBase):
         # update his Z
 
         entries = list(self.ralphGroundHandler.entries)
-        entries.sort(key=lambda x: x.getSurfacePoint(render).getZ())
+        entries.sort(key=lambda x: x.getSurfacePoint(self.render).getZ())
 
         for entry in entries:
             if entry.getIntoNode().name == "terrain":
-                self.ralph.setZ(entry.getSurfacePoint(render).getZ())
+                self.ralph.setZ(entry.getSurfacePoint(self.render).getZ())
 
         # Keep the camera at one unit above the terrain,
         # or two units above ralph, whichever is greater.
 
         entries = list(self.camGroundHandler.entries)
-        entries.sort(key=lambda x: x.getSurfacePoint(render).getZ())
+        entries.sort(key=lambda x: x.getSurfacePoint(self.render).getZ())
 
         for entry in entries:
             if entry.getIntoNode().name == "terrain":
-                self.camera.setZ(entry.getSurfacePoint(render).getZ() + 1.5)
+                self.camera.setZ(entry.getSurfacePoint(self.render).getZ() + 1.5)
         if self.camera.getZ() < self.ralph.getZ() + 2.0:
             self.camera.setZ(self.ralph.getZ() + 2.0)
 
