@@ -69,6 +69,9 @@ Based on the classic **“Roaming Ralph”** tutorial.
 ```
 Ralph/
 │
+├── .github/
+│   └── workflows/
+│       └── build.yml
 ├── main.py
 ├── setup.py
 ├── requirements.txt
