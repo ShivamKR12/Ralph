@@ -1,5 +1,17 @@
 # Roaming Ralph – Panda3D Demo
 
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Panda3D](https://img.shields.io/badge/Engine-Panda3D-15427b?logo=python&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=github-actions&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+
+</div>
+
+
+
 A simple third-person character controller demo built with **Panda3D**.
 
 This project showcases:
