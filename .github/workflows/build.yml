@@ -4,11 +4,9 @@ on:
   push:
     paths:
       - '**.py'
-      - '**.spec'
-      - '**.ini'
       - 'requirements.txt'
       - 'setup.py'
-      - '.github/workflows/*.yml'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 
 permissions:
@@ -63,3 +61,30 @@ jobs:
             Ralph-Windows.zip
             Ralph-Linux.zip
             Ralph-macOS.zip
+
+      - name: Setup Butler
+        uses: remarkablegames/setup-butler@v1
+
+      - name: Publish Windows to itch.io via Butler
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          mkdir -p push_win
+          cp Ralph-Windows.zip push_win/
+          butler push push_win shivamkr12/roaming-ralph:windows --userversion v1.0.${{ github.run_number }}
+
+      - name: Publish Linux to itch.io via Butler
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          mkdir -p push_linux
+          cp Ralph-Linux.zip push_linux/
+          butler push push_linux shivamkr12/roaming-ralph:linux --userversion v1.0.${{ github.run_number }}
+
+      - name: Publish macOS to itch.io via Butler
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          mkdir -p push_mac
+          cp Ralph-macOS.zip push_mac/
+          butler push push_mac shivamkr12/roaming-ralph:mac --userversion v1.0.${{ github.run_number }}
